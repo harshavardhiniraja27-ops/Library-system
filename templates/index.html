@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>Reading Room — library catalogue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+  <header class="hero">
+    <div class="hero__grain" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <p class="hero__eyebrow">Library</p>
+      <h1 class="hero__title">The Reading<br>Room Ledger</h1>
+      <p class="hero__sub">Every title on the shelf, who has it, and when it came back — kept the way a librarian would
+        keep it.</p>
+
+      <dl class="tally" id="tally">
+        <div class="tally__item">
+          <dd data-tally="titles">0</dd>
+          <dt>Titles held</dt>
+        </div>
+        <div class="tally__item">
+          <dd data-tally="copies">0</dd>
+          <dt>Copies total</dt>
+        </div>
+        <div class="tally__item">
+          <dd data-tally="available">0</dd>
+          <dt>On the shelf</dt>
+        </div>
+        <div class="tally__item">
+          <dd data-tally="issued">0</dd>
+          <dt>Checked out</dt>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- ------------------------------------------------ add / edit form -->
+    <section class="slip" aria-labelledby="form-heading">
+      <p class="slip__tab">Accession slip</p>
+      <h2 class="slip__heading" id="form-heading">Add a book</h2>
+
+      <form id="book-form" novalidate>
+        <input type="hidden" id="book-id">
+
+        <div class="field">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" autocomplete="off" required>
+          <p class="field__error" data-error="title"></p>
+        </div>
+
+        <div class="field">
+          <label for="author">Author</label>
+          <input type="text" id="author" name="author" autocomplete="off" required>
+          <p class="field__error" data-error="author"></p>
+        </div>
+
+        <div class="field">
+          <label for="isbn">ISBN</label>
+          <input type="text" id="isbn" name="isbn" placeholder="10 or 13 digits" required>
+          <p class="field__error" data-error="isbn"></p>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+              {% for value, label in categories %}
+              <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+            <p class="field__error" data-error="category"></p>
+          </div>
+
+          <div class="field">
+            <label for="published_year">Year</label>
+            <input type="number" id="published_year" name="published_year" min="1450" max="2100" required>
+            <p class="field__error" data-error="published_year"></p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="total_copies">Copies</label>
+            <input type="number" id="total_copies" name="total_copies" min="1" value="1" required>
+            <p class="field__error" data-error="total_copies"></p>
+          </div>
+
+          <div class="field">
+            <label for="shelf">Shelf mark</label>
+            <input type="text" id="shelf" name="shelf" placeholder="e.g. TC-04" autocomplete="off">
+            <p class="field__error" data-error="shelf"></p>
+          </div>
+        </div>
+
+        <p class="field__error field__error--form" data-error="__all__"></p>
+
+        <div class="slip__actions">
+          <button type="submit" class="btn btn--primary" id="submit-btn">Save book</button>
+          <button type="button" class="btn btn--quiet" id="cancel-btn" hidden>Cancel edit</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ----------------------------------------------------- the shelves -->
+    <section class="shelves" aria-labelledby="shelf-heading">
+      <h2 class="slip__heading slip__heading--wide" id="shelf-heading">Catalogue</h2>
+
+      <div class="filters">
+        <input type="search" id="search" placeholder="Search title, author or ISBN" aria-label="Search the catalogue">
+        <select id="filter-category" aria-label="Filter by category">
+          <option value="">All categories</option>
+          {% for value, label in categories %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select id="filter-status" aria-label="Filter by availability">
+          <option value="">Any availability</option>
+          <option value="available">On shelf</option>
+          <option value="out">All copies issued</option>
+        </select>
+        <select id="sort" aria-label="Sort the catalogue">
+          <option value="title">Sort by title</option>
+          <option value="author">Sort by author</option>
+          <option value="published_year">Sort by year</option>
+          <option value="-updated_at">Recently changed</option>
+        </select>
+      </div>
+
+      <ul class="book-list" id="book-list"></ul>
+      <p class="empty" id="empty" hidden></p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+
+</html>
